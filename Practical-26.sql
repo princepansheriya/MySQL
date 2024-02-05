@@ -1,14 +1,14 @@
--- Create database
-CREATE DATABASE Employee;
-USE Employee;
+-- create databse
+CREATE DATABASE employee;	
+USE employee;
 
--- Hobby table
-CREATE TABLE Hobby (
+-- hobby table
+CREATE TABLE hobby (
   id INT PRIMARY KEY AUTO_INCREMENT, 
   name VARCHAR(255) NOT NULL UNIQUE
 );
 
-INSERT INTO Hobby (name) 
+INSERT INTO hobby (name) 
 VALUES 
   ('Reading'), 
   ('Gardening'), 
@@ -16,16 +16,16 @@ VALUES
   ('Cooking'), 
   ('Traveling');
 
-SELECT * FROM Hobby;
-DELETE FROM Hobby WHERE id IN (1,2);
+SELECT * FROM hobby;
+DELETE FROM hobby WHERE id IN(1,2);
 
-UPDATE Hobby SET name = 'Learning' WHERE id = 1;
-UPDATE Hobby SET name = 'Writing' WHERE id = 2;
+UPDATE hobby SET name = 'Learning' WHERE id = 1;
+UPDATE hobby SET name = 'Writing' WHERE id = 2;
 
-TRUNCATE TABLE Hobby;
+TRUNCATE TABLE hobby;
 
--- Employee table
-CREATE TABLE Employee (
+-- employee table
+ CREATE TABLE employee (
   id INT PRIMARY KEY AUTO_INCREMENT, 
   first_name VARCHAR(255) NOT NULL, 
   last_name VARCHAR(255) NOT NULL, 
@@ -34,7 +34,8 @@ CREATE TABLE Employee (
   address VARCHAR(255)
 );
 
-INSERT INTO Employee (first_name, last_name, age, mobile_number, address)
+
+INSERT INTO employee (first_name, last_name, age, mobile_number, address)
 VALUES 
     ('John', 'Doe', 30, '1239567890', '123 Main St'),
     ('Jane', 'Smith', 25, '9876543210', '456 Oak Ave'),
@@ -43,24 +44,24 @@ VALUES
     ('Eva', 'Williams', 22, '1112223333', '303 Cedar Ave'),
     ('Tom', 'Clark', 32, '4445556666', '505 Elm St');
 
-SELECT * FROM Employee;
+SELECT * FROM employee;
 
-UPDATE Employee SET age = 31 WHERE id = 1;
-UPDATE Employee SET address = '789 Pine St' WHERE id = 2;
+UPDATE employee SET age = 31 WHERE id = 1;
+UPDATE employee SET address = '789 Pine St' WHERE id = 2;
 
-DELETE FROM Employee WHERE id = 1;
-TRUNCATE TABLE Employee;
+DELETE FROM employee WHERE id = 1;
+TRUNCATE TABLE employee;
 
--- Employee_Salary table
-CREATE TABLE Employee_Salary (
+-- employee_salary table
+CREATE TABLE employee_salary (
   id INT PRIMARY KEY AUTO_INCREMENT, 
-  employee_id INT, 
-  salary INT, 
-  date DATE, 
-  FOREIGN KEY (employee_id) REFERENCES Employee(id) ON DELETE CASCADE
+  fk_employee_id INT, 
+  salary DECIMAL, 
+  salary_date DATE, 
+  FOREIGN KEY (fk_employee_id) REFERENCES Employee(id) ON DELETE CASCADE
 );
 
-INSERT INTO Employee_Salary (employee_id, salary, date) 
+INSERT INTO employee_salary (fk_employee_id, salary, salary_date) 
 VALUES 
   (1, 50000, '2023-01-15'), 
   (2, 60000, '2023-01-20'), 
@@ -68,79 +69,67 @@ VALUES
   (4, 50000, '2023-01-15'), 
   (5, 60000, '2023-01-20'), 
   (3, 55000, '2023-01-25');
- 
-SELECT * FROM Employee_Salary;
 
-UPDATE Employee_Salary SET salary = 55000 WHERE id = 1;
-UPDATE Employee_Salary SET date = '2023-01-25' WHERE id = 2;
+SELECT * FROM employee_salary;
 
-DELETE FROM Employee_Salary WHERE id = 1;
-TRUNCATE TABLE Employee_Salary;
+UPDATE employee_salary SET salary = 55000 WHERE id = 1;
+UPDATE employee_salary SET salary_date = '2023-01-25' WHERE id = 2;
 
--- Employee_Hobby table
-CREATE TABLE Employee_Hobby (
+DELETE FROM employee_salary WHERE id = 1;
+TRUNCATE TABLE employee_salary;
+
+-- employee_hobby table
+CREATE TABLE employee_hobby (
   id INT PRIMARY KEY AUTO_INCREMENT, 
-  employee_id INT, 
-  hobby_id INT, 
-  FOREIGN KEY (employee_id) REFERENCES Employee(id) ON DELETE CASCADE, 
-  FOREIGN KEY (hobby_id) REFERENCES Hobby(id) ON DELETE CASCADE
+  fk_employee_id INT, 
+  fk_hobby_id INT,    
+  FOREIGN KEY (fk_employee_id) REFERENCES employee(id) ON DELETE CASCADE, 
+  FOREIGN KEY (fk_hobby_id) REFERENCES hobby(id) ON DELETE CASCADE
 );
 
-INSERT INTO Employee_Hobby ( employee_id, hobby_id)
+INSERT INTO employee_hobby (fk_employee_id, fk_hobby_id)
 VALUES 
-    ( 1, 1), 
-    ( 2, 2),
-    ( 1, 4), 
-    ( 4, 3);
+    (1, 1), 
+    (2, 2),
+    (1, 4), 
+    (4, 3);
 
-SELECT * FROM Employee_Hobby;
+SELECT * FROM employee_hobby;
 
-UPDATE Employee_Hobby SET hobby_id = 3 WHERE id = 1;  
-UPDATE Employee_Hobby SET employee_id = 1 WHERE id = 2;
+UPDATE employee_hobby SET fk_hobby_id = 3 WHERE id = 1;  
+UPDATE employee_hobby SET fk_employee_id = 1 WHERE id = 2;
 
-DELETE FROM Employee_Hobby WHERE id = 1;
+DELETE FROM employee_hobby WHERE id = 1;
 
-TRUNCATE TABLE Employee_Hobby;
+TRUNCATE TABLE employee_hobby;
 
 -- Create a select single query to get all employee name, all hobby_name in single column
-SELECT    
-    CONCAT(e.first_name, ' ', e.last_name) AS employee_name,
-    GROUP_CONCAT(DISTINCT  h.name ORDER BY h.name DESC ) AS employee_hobbies
-FROM 
-    Employee as  e
-LEFT JOIN 
-    Employee_Hobby as eh ON e.id = eh.employee_id
-LEFT JOIN 
-    Hobby as h ON eh.hobby_id = h.id 
-GROUP BY 
-    e.id;
-
 SELECT 
     CONCAT(e.first_name, ' ', e.last_name) AS result
 FROM 
-    Employee e
+    employee e
 
 UNION
 
 SELECT 
     h.name
 FROM 
-    Hobby h
+    hobby h
 ORDER BY
     result;
 
 -- Create a select query to get  employee name, his/her employee_salary
 SELECT
-    e.first_name AS employee_name,
+    CONCAT(e.first_name, ' ', e.last_name) AS employee_name,
     SUM(es.salary) AS total_salary
 FROM
-    Employee e
-LEFT JOIN
-    Employee_Salary es ON e.id = es.employee_id
+    employee e
+left JOIN
+    employee_salary es ON e.id = es.fk_employee_id
 GROUP BY
     e.id;
-    
-  /* Create a select query to get employee name, total salary of employee, 
+
+/* Create a select query to get employee name, total salary of employee, 
   hobby name(comma-separated - you need to use subquery for hobby name).
   */
 SELECT 
@@ -148,28 +137,13 @@ SELECT
     COALESCE(SUM(es.salary), 0) AS total_salary,
     (
         SELECT GROUP_CONCAT(DISTINCT h.name ORDER BY h.name DESC SEPARATOR ', ') AS hobby_names
-        FROM Hobby h
-        JOIN Employee_Hobby eh ON h.id = eh.hobby_id
-        WHERE eh.employee_id = e.id
+        FROM hobby h
+        JOIN employee_hobby eh ON h.id = eh.fk_hobby_id
+        WHERE eh.fk_employee_id = e.id
     ) AS hobby_names
 FROM 
-    Employee e
+    employee e
 LEFT JOIN 
-    Employee_Salary es ON e.id = es.employee_id
-GROUP BY 
-    e.id;
-
-SELECT 
-    CONCAT(e.first_name, ' ', e.last_name) AS employee_name,
-    SUM(es.salary) AS total_salary,
-    GROUP_CONCAT(DISTINCT h.name) AS hobby_names
-FROM 
-    Employee e
-LEFT JOIN 
-    Employee_Salary es ON e.id = es.employee_id
-LEFT JOIN 
-    Employee_Hobby eh ON e.id = eh.employee_id
-LEFT JOIN 
-    Hobby h ON eh.hobby_id = h.id
+    employee_salary es ON e.id = es.fk_employee_id
 GROUP BY 
     e.id;
